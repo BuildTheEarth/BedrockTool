@@ -1,0 +1,6 @@
+name: AutoOp
+main: io.github.rudeyeti.autoop.AutoOp
+version: "1.0.0"
+api: ["1.0.0"]
+load: POSTWORLD
+author: Rude Yeti, Incorporated
