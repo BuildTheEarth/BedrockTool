@@ -20,7 +20,6 @@
 
 package net.daporkchop.ccpregen;
 
-import io.github.opencubicchunks.cubicchunks.api.util.XYZMap;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubeProviderServer;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubicWorldServer;
 import io.github.opencubicchunks.cubicchunks.core.server.CubeProviderServer;
@@ -34,7 +33,6 @@ import net.minecraftforge.common.WorldWorkerManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 
 import static java.lang.Long.parseUnsignedLong;
 import static net.daporkchop.ccpregen.PregenState.*;
@@ -46,7 +44,6 @@ public class PregenerationWorker implements WorldWorkerManager.IWorker {
     private static final Method CUBEPROVIDERSERVER_TRYUNLOADCUBE;
     private static final Method CUBEPROVIDERSERVER_CUBESITERATOR;
     private static final Field CUBEPROVIDERSERVER_CUBEMAP;
-    private static final Object[] SINGLETON_ARRAY = new Object[1];
 
     static {
         try {
@@ -100,7 +97,7 @@ public class PregenerationWorker implements WorldWorkerManager.IWorker {
             ICubeProviderInternal.Server provider = (ICubeProviderInternal.Server) ((ICubicWorldServer) this.world).getCubeCache();
             int saveQueueSize = provider.getCubeIO().getPendingCubeCount();
 
-            if (this.lastMsg + PregenConfig.notificationInterval < System.currentTimeMillis()) {
+            if (this.lastMsg + 5000 < System.currentTimeMillis()) {
                 System.arraycopy(this.speeds, 0, this.speeds, 1, this.speeds.length - 1);
                 this.speeds[0] = this.gennedSinceLastNotification * 1000.0d / (double) (System.currentTimeMillis() - this.lastMsg);
 
@@ -112,44 +109,17 @@ public class PregenerationWorker implements WorldWorkerManager.IWorker {
                 this.gennedSinceLastNotification = 0;
                 this.lastMsg = System.currentTimeMillis();
             }
-            if (saveQueueSize > PregenConfig.maxSaveQueueSize) {
+            if (saveQueueSize > 10000) {
                 return false;
             }
 
             if (!paused && this.hasWork()) {
                 //generate the chunk at the current position
-                Cube cube = (Cube) ((ICubeProviderServer) provider).getCube(x, y, z, PregenConfig.requirement);
+                Cube cube = (Cube) ((ICubeProviderServer) provider).getCube(x, y, z, ICubeProviderServer.Requirement.LIGHT);
 
                 provider.getCubeIO().saveCube(cube);
-                if (PregenConfig.immediateCubeUnload) {
-                    try {
-                        SINGLETON_ARRAY[0] = cube;
-                        if ((boolean) CUBEPROVIDERSERVER_TRYUNLOADCUBE.invoke(provider, SINGLETON_ARRAY)) {
-                            ((XYZMap<Cube>) CUBEPROVIDERSERVER_CUBEMAP.get(provider)).remove(cube);
-                        }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        SINGLETON_ARRAY[0] = null;
-                    }
-                }
-                if (parseUnsignedLong(generated) % PregenConfig.unloadCubesInterval == 0L) {
-                    if (PregenConfig.unloadColumns) {
+                if (parseUnsignedLong(generated) % 8000 == 0L) {
                         ((ICubicWorldServer) this.world).unloadOldCubes();
-                    } else {
-                        try {
-                            for (Iterator<Cube> itr = (Iterator<Cube>) CUBEPROVIDERSERVER_CUBESITERATOR.invoke(provider); itr.hasNext(); ) {
-                                SINGLETON_ARRAY[0] = itr.next();
-                                if ((boolean) CUBEPROVIDERSERVER_TRYUNLOADCUBE.invoke(provider, SINGLETON_ARRAY)) {
-                                    itr.remove();
-                                }
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            SINGLETON_ARRAY[0] = null;
-                        }
-                    }
                 }
 
                 PregenState.next();

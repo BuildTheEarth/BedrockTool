@@ -43,6 +43,7 @@ public class CCPregen {
     public static final String VERSION = "0.0.4-1.12.2";
 
     public static Logger logger;
+    public static MinecraftServer server;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -56,7 +57,7 @@ public class CCPregen {
         BufferedReader fileReader = new BufferedReader(new FileReader(response));
         region = fileReader.readLine().split("\\.");
         fileReader.close();
-        MinecraftServer server = event.getServer();
+        server = event.getServer();
         int intX = Integer.parseInt(region[0]);
         int intZ = Integer.parseInt(region[1]);
         int X = intX * 512;
@@ -83,6 +84,6 @@ public class CCPregen {
         wr.close();
 
         logger.info("[Bedrock Tool]Generating the region...");
-        PregenState.startPregeneration(server, min, max, 0);
+        PregenState.startPregeneration(min, max);
     }
 }

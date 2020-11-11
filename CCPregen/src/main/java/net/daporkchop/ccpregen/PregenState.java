@@ -20,22 +20,15 @@
 
 package net.daporkchop.ccpregen;
 
-import net.minecraft.command.ICommandSender;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.WorldWorkerManager;
-import net.minecraftforge.common.config.Config;
 
 import static java.lang.Long.parseUnsignedLong;
 
 /**
  * @author DaPorkchop_
  */
-@Config(modid = CCPregen.MODID, category = "state")
 public class PregenState {
-    @Config.Comment({
-            "Whether or not the pregenerator is currently running.",
-            "Set to false to abort an ongoing pregeneration task."
-    })
 
     public static boolean active = false;
     public static boolean paused = false;
@@ -51,7 +44,6 @@ public class PregenState {
     public static int x;
     public static int z;
 
-    //these fields are a hack because forge doesn't support long fields for config
     public static String generated = "";
     public static String total = "";
 
@@ -75,22 +67,20 @@ public class PregenState {
         }
     }
 
-    public static boolean startPregeneration(ICommandSender sender, BlockPos min, BlockPos max, int dimension) {
-        return startPregenerationCubes(sender,
+    public static void startPregeneration(BlockPos min, BlockPos max) {
+        startPregenerationCubes(
                 new BlockPos(min.getX() >> 4, min.getY() >> 4, min.getZ() >> 4).add(-1, -1, -1),
-                new BlockPos(max.getX() >> 4, max.getY() >> 4, max.getZ() >> 4).add(1, 1, 1),
-                dimension);
+                new BlockPos(max.getX() >> 4, max.getY() >> 4, max.getZ() >> 4).add(1, 1, 1));
     }
 
-    public static boolean startPregenerationCubes(ICommandSender sender, BlockPos min, BlockPos max, int dimension) {
+    public static void startPregenerationCubes(BlockPos min, BlockPos max) {
         if (active) {
-            return false;
+            return;
         } else {
             active = true;
         }
 
         paused = false;
-        dim = dimension;
         minX = min.getX();
         minY = min.getY();
         minZ = min.getZ();
@@ -101,7 +91,6 @@ public class PregenState {
         total = String.valueOf((maxX - minX + 1L) * (maxY - minY + 1L) * (maxZ - minZ + 1L));
         init();
 
-        WorldWorkerManager.addWorker(new PregenerationWorker(sender));
-        return true;
+        WorldWorkerManager.addWorker(new PregenerationWorker(CCPregen.server));
     }
 }
