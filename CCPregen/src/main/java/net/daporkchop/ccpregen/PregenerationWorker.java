@@ -35,7 +35,6 @@ import net.minecraftforge.common.WorldWorkerManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.stream.DoubleStream;
 
 import static java.lang.Long.parseUnsignedLong;
 import static net.daporkchop.ccpregen.PregenState.*;
@@ -153,7 +152,7 @@ public class PregenerationWorker implements WorldWorkerManager.IWorker {
                     }
                 }
 
-                order.next();
+                PregenState.next();
                 this.gennedSinceLastNotification++;
 
                 generated = String.valueOf(parseUnsignedLong(generated) + 1);

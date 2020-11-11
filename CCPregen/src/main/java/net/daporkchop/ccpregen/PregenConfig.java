@@ -21,7 +21,6 @@
 package net.daporkchop.ccpregen;
 
 import io.github.opencubicchunks.cubicchunks.api.world.ICubeProviderServer;
-import net.daporkchop.ccpregen.util.CoordinateOrder;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -66,13 +65,6 @@ public class PregenConfig {
             "of memory."
     })
     public static boolean unloadColumns = true;
-
-    @Config.Comment({
-            "The order in which cubes will be generated.",
-            "Slices are 1-cube-tall horizontal planes, columns should be self-explanatory :P",
-            "Cannot be updated retroactively on an already running task."
-    })
-    public static CoordinateOrder order = CoordinateOrder.SLICES_TOP_TO_BOTTOM;
 
     @Config.Comment({
             "Whether or not cubes should be unloaded immediately after they are generated.",

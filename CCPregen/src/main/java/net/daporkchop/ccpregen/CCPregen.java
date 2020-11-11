@@ -30,7 +30,6 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.Scanner;
 
 @Mod(modid = CCPregen.MODID,
         name = CCPregen.NAME,

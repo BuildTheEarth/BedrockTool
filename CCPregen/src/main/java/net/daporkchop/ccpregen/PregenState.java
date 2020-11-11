@@ -20,13 +20,12 @@
 
 package net.daporkchop.ccpregen;
 
-import net.daporkchop.ccpregen.util.CoordinateOrder;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.WorldWorkerManager;
 import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.ConfigManager;
+
+import static java.lang.Long.parseUnsignedLong;
 
 /**
  * @author DaPorkchop_
@@ -37,6 +36,7 @@ public class PregenState {
             "Whether or not the pregenerator is currently running.",
             "Set to false to abort an ongoing pregeneration task."
     })
+
     public static boolean active = false;
     public static boolean paused = false;
 
@@ -55,7 +55,25 @@ public class PregenState {
     public static String generated = "";
     public static String total = "";
 
-    public static CoordinateOrder order = CoordinateOrder.SLICES_TOP_TO_BOTTOM;
+    public static void init() {
+        x = minX;
+        y = maxY;
+        z = minZ;
+    }
+
+    public static void next() {
+        if (++x > maxX) {
+            if (++z > maxZ) {
+                if (--y < minY) {
+                    if (parseUnsignedLong(generated) < parseUnsignedLong(total) - 1L) {
+                        throw new IllegalStateException(String.format("Iteration finished, but we only generated %s/%s cubes?!?", generated, total));
+                    }
+                }
+                z = minZ;
+            }
+            x = minX;
+        }
+    }
 
     public static boolean startPregeneration(ICommandSender sender, BlockPos min, BlockPos max, int dimension) {
         return startPregenerationCubes(sender,
@@ -81,7 +99,7 @@ public class PregenState {
         maxZ = max.getZ();
         generated = "0";
         total = String.valueOf((maxX - minX + 1L) * (maxY - minY + 1L) * (maxZ - minZ + 1L));
-        (order = PregenConfig.order).init();
+        init();
 
         WorldWorkerManager.addWorker(new PregenerationWorker(sender));
         return true;
