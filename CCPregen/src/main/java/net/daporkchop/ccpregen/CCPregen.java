@@ -20,9 +20,11 @@
 
 package net.daporkchop.ccpregen;
 
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -82,6 +84,12 @@ public class CCPregen {
         wr = new FileWriter(path + "\\height");
         wr.write(String.valueOf(Y));
         wr.close();
+
+        Biome biome = server.getWorld(0).getBiome(min);
+
+        if (biome == Biomes.OCEAN || biome == Biomes.DEEP_OCEAN || biome == Biomes.FROZEN_OCEAN) {
+            logger.info("[Bedrock Tool]Warning: This region could be in the ocean...");
+        }
 
         logger.info("[Bedrock Tool]Generating the region...");
         PregenState.startPregeneration(min, max);
